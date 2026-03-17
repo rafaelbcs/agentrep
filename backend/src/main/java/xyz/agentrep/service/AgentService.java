@@ -22,6 +22,11 @@ import java.util.UUID;
 @Slf4j
 public class AgentService {
 
+    public static final List<String> VALID_CATEGORIES = List.of(
+        "code-review", "data-analysis", "research", "content",
+        "infra", "finance", "trading", "legal", "ops"
+    );
+
     private final AgentRepository agentRepository;
     private final ApiKeyService apiKeyService;
     private final PasswordEncoder passwordEncoder;
@@ -36,9 +41,16 @@ public class AgentService {
         String rawApiKey = apiKeyService.generateApiKey();
         String hashedApiKey = apiKeyService.hashApiKey(rawApiKey);
 
-        java.util.Set<String> cats = request.getCategories() != null
-            ? new java.util.HashSet<>(request.getCategories())
-            : new java.util.HashSet<>();
+        java.util.Set<String> cats = new java.util.HashSet<>();
+        if (request.getCategories() != null) {
+            for (String cat : request.getCategories()) {
+                if (!VALID_CATEGORIES.contains(cat)) {
+                    throw new IllegalArgumentException(
+                        "Invalid category: " + cat + ". Valid: " + VALID_CATEGORIES);
+                }
+            }
+            cats.addAll(request.getCategories());
+        }
 
         Agent agent = Agent.builder()
             .walletAddress(request.getAgentAddress().toLowerCase())

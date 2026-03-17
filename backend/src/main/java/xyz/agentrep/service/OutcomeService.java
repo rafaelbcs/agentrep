@@ -26,11 +26,9 @@ public class OutcomeService {
     private final AgentService agentService;
     private final LlmJudgeService llmJudgeService;
     private final OnChainService onChainService;
+    private final WebhookService webhookService;
 
-    private static final List<String> VALID_CATEGORIES = List.of(
-        "code-review", "data-analysis", "research", "content",
-        "infra", "finance", "trading", "legal", "ops"
-    );
+    private static final List<String> VALID_CATEGORIES = AgentService.VALID_CATEGORIES;
 
     @Transactional
     public OutcomeResponse register(OutcomeRequest request, String requesterWallet) {
@@ -93,6 +91,19 @@ public class OutcomeService {
             AgentScoreUpdate scoreUpdate = updateAgentScore(outcome.getContractorAgent().getId());
             log.info("Outcome {} resolved by LLM Judge: {} (confidence={})",
                 outcomeId, result.verdict(), result.confidence());
+
+            // Notify subscribers — non-blocking
+            UUID contractorId = outcome.getContractorAgent().getId();
+            webhookService.dispatch(contractorId, WebhookService.EVENT_OUTCOME_RESOLVED, java.util.Map.of(
+                "outcomeId", outcomeId.toString(),
+                "verdict",   result.verdict().name(),
+                "confidence", result.confidence()
+            ));
+            webhookService.dispatch(contractorId, WebhookService.EVENT_SCORE_UPDATED, java.util.Map.of(
+                "score",         scoreUpdate.score(),
+                "totalOutcomes", scoreUpdate.totalOutcomes(),
+                "successCount",  scoreUpdate.successCount()
+            ));
 
             // Sync to blockchain (non-blocking — failure does not affect outcome)
             onChainService.registerOutcome(outcome, scoreUpdate.score(), scoreUpdate.totalOutcomes(), scoreUpdate.successCount())
