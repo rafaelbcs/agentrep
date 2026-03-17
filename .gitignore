@@ -1,0 +1,39 @@
+# ─── Node ─────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Java / Maven ─────────────────────────────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+
+# ─── Frontend build ───────────────────────────────────────────────────────────
+frontend/dist/
+frontend/.vite/
+
+# ─── Hardhat / Solidity ───────────────────────────────────────────────────────
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+contracts/.openzeppelin/
+
+# ─── Environment / secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/

@@ -1,0 +1,140 @@
+PROMPT (copiar e colar no Loveable/Base44)
+
+Contexto
+Você é um gerador de aplicações (low-code/fullstack) e deve criar um sistema municipal 100% online para ISS (Imposto Sobre Serviço) e IPTU (Imposto Predial e Territorial Urbano), com foco em aumentar eficiência de arrecadação, transparência para o contribuinte e produtividade interna.
+
+Objetivo
+Construir uma aplicação web responsiva (desktop e mobile) para:
+- Cadastro e gestão de contribuintes (PF e PJ)
+- Gestão de imóveis e inscrição imobiliária (para IPTU)
+- Emissão de guias (ISS e IPTU)
+- Consulta de débitos e histórico
+- Notificações e relatórios
+- Regras especiais do IPTU 2026 com reajuste de base de cálculo “a mercado”
+
+Perfis de usuário
+1) Contribuinte PF
+2) Contribuinte PJ
+3) Atendente/Servidor (tributação)
+4) Fiscal
+5) Administrador do sistema
+
+Módulos e funcionalidades (requisitos)
+
+A) Autenticação e acesso
+- Login com CPF/CNPJ e senha
+- Recuperação de senha
+- 2FA opcional
+- Perfis e permissões (RBAC)
+
+B) Cadastro de Contribuintes
+- PF: nome, data nasc., CPF, endereço completo, telefone, e-mail, nacionalidade, estado civil, profissão
+- PJ: razão social, nome fantasia, CNPJ, inscrição municipal, endereço completo, telefone, e-mail, CNAE, data de abertura, sócios/participações
+- Preferência de contato/alertas (e-mail, SMS, WhatsApp se disponível)
+- Anexos/documentos (compliance LGPD)
+
+C) Cadastro/Gestão de Imóveis (IPTU)
+- Inscrição imobiliária
+- Endereço do imóvel
+- Características (área do terreno, área construída, padrão, uso: residencial/comercial/misto, zoneamento/bairro/quadra/lote se aplicável)
+- Titularidade (vínculo contribuinte-imóvel)
+- Histórico de alterações
+
+D) ISS
+- Cadastro de atividades/serviços (CNAE/itens de lista municipal)
+- Parametrização de alíquotas por atividade
+- Base de cálculo conforme regra municipal (ex.: faturamento/nota/declaração)
+- Emissão de guia por competência (mês/ano)
+
+E) IPTU (cálculo e emissão)
+- Parametrização por exercício (ano): alíquotas, isenções, descontos, vencimentos, parcelamento
+- Cálculo da base do IPTU considerando valor venal/área/padrão conforme legislação
+- Emissão de carnê/parcelas e guia única
+
+F) Reajuste do IPTU “a mercado” (vigência 2026)
+Implementar uma funcionalidade específica para 2026:
+- Conceito: além da correção anual pela inflação, em 2026 haverá atualização extraordinária da base de cálculo do IPTU para aproximar do preço real de venda do imóvel (valor de mercado).
+- Parametrização por exercício: permitir cadastrar regra “a mercado” por ano (2026), com:
+  - data de vigência
+  - critérios e fórmulas (ex.: por zona/bairro/faixa de valor)
+  - fatores/percentuais
+  - limites: percentuais máximos e mínimos de variação (se definidos em lei)
+- Fonte do valor de mercado: registrar origem do valor (PGV/zoneamento/laudo/importação) e armazenar:
+  - base anterior
+  - base recalculada “a mercado”
+  - metadados (origem, versão, referência)
+- Simulação/Prévia para contribuinte e servidor:
+  - comparar base antiga vs. base atualizada
+  - imposto antes vs. depois
+  - variação percentual
+  - explicação do critério aplicado
+- Aplicação controlada em lote:
+  - seleção por bairro/quadra/zona/inscrição
+  - trilha de auditoria (quem executou, quando, parâmetros)
+  - reprocessamento com versionamento
+- Transparência:
+  - extrato explicativo acessível no Portal do Contribuinte
+- Integridade por exercício:
+  - exercícios anteriores não podem ser recalculados automaticamente; manter histórico separado por ano
+
+G) Emissão de Guias e Pagamentos
+- Gerar guia com: contribuinte, imposto (ISS/IPTU), referência, base, alíquota, valor, vencimento, código de barras/linha digitável
+- PDF para download
+- Status: emitida, paga, vencida, cancelada, renegociada
+- Integração com pagamentos (placeholder): boleto, cartão, pix (se aplicável). Não hardcode de credenciais.
+
+H) Consulta de Débitos e Notificações
+- Contribuinte consulta débitos por imposto e por exercício/competência
+- Notificações automáticas: vencimentos, pendências, guias emitidas, confirmação de pagamento
+
+I) Relatórios e dashboards (Admin)
+- Arrecadação por período, por tipo (ISS/IPTU), por bairro/zona
+- Inadimplência e aging de débitos
+- Relatório específico 2026: impacto do reajuste “a mercado” (quantos imóveis afetados, variação média, distribuição)
+
+J) Auditoria, LGPD e Segurança
+- Log de ações sensíveis (alterar base de cálculo, aplicar lote, cancelar guia)
+- Permissões por perfil
+- Proteção de dados: criptografia em trânsito e em repouso quando possível
+
+Telas (mínimo esperado)
+- Login / recuperação
+- Portal do Contribuinte (dashboard)
+- Cadastro/edição de contribuinte
+- Lista de imóveis e detalhe do imóvel
+- Simulador IPTU 2026 “a mercado” (comparativo)
+- Emissão de guia ISS
+- Emissão de guia IPTU (carnê/única)
+- Consulta de débitos e histórico
+- Admin: parametrizações (alíquotas, exercícios, vencimentos)
+- Admin: rotina de aplicação em lote do “a mercado” + auditoria
+- Relatórios/dashboards
+
+Regras de negócio (critérios de aceitação)
+- Ao calcular IPTU de 2026, se a regra “a mercado” estiver ativa, o sistema deve usar a base recalculada e guardar o comparativo.
+- Ao calcular IPTU de 2025 ou anterior, o sistema não deve aplicar a regra “a mercado”.
+- Toda aplicação em lote deve gerar trilha de auditoria e permitir consulta posterior.
+- O contribuinte deve conseguir visualizar uma explicação do reajuste 2026 no portal.
+
+Dados (modelo sugerido)
+- Contribuinte
+- Imóvel
+- ExercícioIPTU (parametrizações por ano)
+- RegraReajusteMercado (por exercício, zona/faixa, parâmetros)
+- AvaliacaoMercado/ReferenciaMercado (por imóvel, por exercício)
+- Lancamento (ISS/IPTU)
+- GuiaPagamento
+- Pagamento
+- Auditoria
+
+Preferências de implementação
+- UI moderna, limpa, acessível e responsiva
+- Fluxos guiados (wizard) para emissão de guias e para simulação 2026
+- Campos com validação (CPF/CNPJ, datas, valores)
+- Busca e filtros (por inscrição, CPF/CNPJ, bairro)
+
+Entregue
+- Aplicação navegável com telas e fluxos acima
+- Banco de dados/modelos coerentes
+- Regras de cálculo e simulação do IPTU 2026 “a mercado” implementadas
+- Seeds/dados de exemplo para demonstrar o funcionamento

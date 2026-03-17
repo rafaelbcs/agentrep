@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agentrep-postgres
+    environment:
+      POSTGRES_DB: agentrep
+      POSTGRES_USER: agentrep
+      POSTGRES_PASSWORD: agentrep
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentrep"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: agentrep-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agentrep-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/agentrep
+      DB_USERNAME: agentrep
+      DB_PASSWORD: agentrep
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      BASE_RPC_URL: ${BASE_RPC_URL:-https://sepolia.base.org}
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:-0x0000000000000000000000000000000000000000}
+      DEPLOYER_PRIVATE_KEY: ${DEPLOYER_PRIVATE_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production-at-least-32-chars}
+    profiles:
+      - full
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agentrep-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    profiles:
+      - full
+
+volumes:
+  postgres_data:

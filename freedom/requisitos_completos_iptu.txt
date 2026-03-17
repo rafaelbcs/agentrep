@@ -1,0 +1,491 @@
+# Requisitos Completos — SaaS Municipal de IPTU e ISS
+
+Sistema 100% online, multi-tenant, para gestão e arrecadação de IPTU, ISS e tributos municipais correlatos. Modelo de negócio: migração da base do cliente (prefeitura) para a plataforma e cobrança de mensalidade.
+
+---
+
+## Índice de Fases
+
+- **MVP** — Funcionalidades essenciais para operar o primeiro cliente
+- **V2** — Funcionalidades de inteligência, automação e ampliação de escopo
+- **V3** — Funcionalidades avançadas com IA, visão computacional e analytics
+
+---
+
+# ═══════════════════════════════════════════
+# FASE MVP — Sistema Operacional Mínimo
+# ═══════════════════════════════════════════
+
+## 1. Arquitetura Multi-Tenant
+
+- Cada prefeitura é um tenant isolado com dados segregados
+- Subdomínio ou domínio próprio por tenant (ex: `parnamirim.plataforma.com.br`)
+- Branding customizável por tenant (brasão, cores, nome do município)
+- Painel administrativo do SaaS (backoffice) para gerenciar tenants, planos e cobrança de mensalidade
+
+## 2. Cadastro de Contribuintes
+
+### Pessoas Físicas (PF)
+
+- Nome completo
+- Data de nascimento
+- CPF
+- Endereço completo (rua, número, complemento, bairro, cidade, estado, CEP)
+- Telefone de contato
+- E-mail
+- Nacionalidade
+- Estado civil
+- Profissão
+
+### Pessoas Jurídicas (PJ)
+
+- Razão social
+- Nome fantasia
+- CNPJ
+- Inscrição municipal
+- Endereço completo (rua, número, complemento, bairro, cidade, estado, CEP)
+- Telefone de contato
+- E-mail
+- Atividade econômica (CNAE)
+- Data de abertura da empresa
+- Nome dos sócios e respectivas participações
+
+### Informações Adicionais
+
+- Histórico de pagamento de impostos (débitos pendentes, últimos pagamentos, datas de vencimento)
+- Autorização para recebimento de notificações (método preferencial: e-mail, SMS)
+- Documentação anexada (RG, comprovante de endereço, contrato social etc.)
+- Conformidade com LGPD na coleta e armazenamento de dados
+
+## 3. Cadastro Imobiliário (BCI — Boletim de Cadastro Imobiliário)
+
+- Inscrição imobiliária (identificação única do imóvel)
+- Dados do terreno: área, testada, topografia, pedologia, situação (esquina, meio de quadra)
+- Dados da construção: área construída, padrão construtivo, tipo (residencial, comercial, misto), idade, estado de conservação
+- Zoneamento fiscal
+- Vinculação ao contribuinte proprietário
+- Histórico de alterações cadastrais
+
+## 4. Planta Genérica de Valores (PGV)
+
+- Cadastro e manutenção da PGV por logradouro e face de quadra
+- Valores por m² de terreno e construção
+- Vigência por exercício fiscal
+- Histórico de PGVs anteriores
+- Base para cálculo automático do valor venal
+
+## 5. Cálculo Automático de Impostos
+
+### IPTU
+
+- Cálculo do valor venal (terreno + construção) com base no BCI e PGV
+- Aplicação de alíquotas por faixa de valor e tipo de uso (residencial, comercial, territorial)
+- Descontos, isenções e imunidades configuráveis por legislação municipal
+- Cálculo de taxas vinculadas (coleta de lixo, iluminação pública, etc.)
+
+### ISS
+
+- Cálculo com base em alíquotas por atividade (CNAE) e regime tributário
+- Base de cálculo: serviços prestados (valor declarado ou estimado)
+- ISS fixo para profissionais autônomos
+- ISS retido na fonte
+
+### Reajuste do IPTU "a Mercado" (Vigência 2026)
+
+- **Conceito**: atualização extraordinária da base de cálculo para aproximá-la do valor real de mercado dos imóveis
+- **Parametrização**: cadastro por ano de exercício da regra de atualização, com data de vigência, faixas/zonas, fatores, percentuais máximos/mínimos e fórmulas de apuração conforme legislação
+- **Fonte do valor de mercado**: registrar origem (avaliação, PGV, tabela por zoneamento, laudo, importação de base externa); armazenar valor calculado e valor anterior para comparação
+- **Simulação/Prévia**: simulação do IPTU com base "a mercado", exibindo comparativo (base antiga vs. atualizada, imposto antes vs. depois, variação percentual, justificativa/critério)
+- **Aplicação controlada**: aplicação em lote (por bairro/quadra/inscrição/zona) com trilha de auditoria e possibilidade de reprocessamento, respeitando perfis e permissões
+- **Auditoria e transparência**: histórico por imóvel (valores, parâmetros, data/hora, usuário, ato normativo); extrato explicativo para o contribuinte
+- **Impactos**: emissão de guias e consulta de débitos consideram a base "a mercado" para o exercício vigente, mantendo integridade de exercícios anteriores
+
+## 6. Emissão de Guias de Recolhimento
+
+### Etapas
+
+1. Seleção do tipo de imposto (ISS ou IPTU)
+2. Preenchimento automático dos dados do contribuinte a partir do cadastro
+3. Cálculo automático do valor devido
+4. Geração da guia contendo: identificação do contribuinte, tipo de imposto, período de referência, valor, data de vencimento, código de barras
+5. Visualização e download em PDF
+6. Envio por e-mail (opcional)
+
+### Métodos de Pagamento
+
+- **PIX** (QR Code gerado na guia) — obrigatório
+- Boleto bancário
+- Cartão de crédito
+- Débito automático (opcional)
+
+### Notificações
+
+- Confirmação de emissão e pagamento via e-mail e/ou SMS
+
+## 7. Dívida Ativa
+
+- Inscrição automática de débitos vencidos em dívida ativa (com regras configuráveis de prazo)
+- Geração de CDA (Certidão de Dívida Ativa)
+- Controle de situação (ativa, suspensa, extinta, em execução fiscal)
+- Integração com protesto em cartório
+- Relatórios de estoque de dívida ativa
+
+## 8. Parcelamento de Débitos
+
+- Regras configuráveis por legislação municipal:
+  - Número máximo de parcelas
+  - Juros e multa
+  - Valor mínimo de parcela
+  - Desconto para pagamento à vista (campanhas tipo "IPTU em Dia")
+- Simulação de parcelamento antes da confirmação
+- Geração automática das guias parceladas
+- Controle de inadimplência no parcelamento (quebra automática)
+
+## 9. Certidão Negativa de Débitos (CND)
+
+- Emissão automática de:
+  - Certidão Negativa de Débitos
+  - Certidão Positiva com Efeito de Negativa
+  - Certidão Positiva
+- Validação online da autenticidade (código de verificação)
+- Prazo de validade configurável
+
+## 10. Consulta de Débitos
+
+- Consulta de débitos pendentes por contribuinte ou inscrição imobiliária
+- Situação fiscal consolidada
+- Notificações sobre prazos e pendências
+- Extrato detalhado com histórico de pagamentos
+
+## 11. Portal do Contribuinte
+
+### Acesso
+
+- Login seguro com CPF/CNPJ e senha
+- Recuperação de senha
+- Autenticação em duas etapas (2FA)
+
+### Dashboard Inicial
+
+- Dados do contribuinte
+- Resumo de débitos pendentes
+- Status de pagamentos recentes
+- Alertas de vencimentos
+
+### Funcionalidades
+
+- Consulta de informações fiscais e histórico de pagamentos
+- Emissão de guias (IPTU, ISS)
+- Emissão de 2ª via de boleto
+- Emissão de CND
+- Atualização de dados cadastrais (endereço, e-mail, telefone)
+- Upload de documentos
+- Simulação de parcelamento
+- Visualização de notificações da administração municipal
+- Solicitação de atendimento (formulário + protocolo)
+- Área de feedback e sugestões
+
+### Chatbot com IA (MVP)
+
+- Assistente virtual para dúvidas frequentes:
+  - "Qual o valor do meu IPTU?"
+  - "Como parcelar minha dívida?"
+  - "Tenho direito a isenção?"
+  - "Emitir 2ª via do boleto"
+- Baseado em LLM fine-tuned na legislação municipal do tenant e nos dados do contribuinte logado
+- Reduz demanda no atendimento presencial
+
+## 12. Sistema de Alertas e Notificações
+
+- Notificações via e-mail e SMS sobre:
+  - Vencimentos próximos
+  - Guias emitidas
+  - Confirmação de pagamento
+  - Mudanças legislativas
+  - Inscrição em dívida ativa
+- Configuração de preferências pelo contribuinte
+
+## 13. Relatórios e Dashboards
+
+- Relatórios de arrecadação (por período, bairro, tipo de imposto, faixa de valor)
+- Relatório de inadimplência
+- Relatório de dívida ativa
+- Dashboard com indicadores de desempenho (KPIs)
+- Exportação em PDF, Excel e CSV
+
+## 14. Controle de Acesso e Perfis
+
+- Perfis: fiscal, atendente, gestor, secretário de finanças, prefeito, administrador do SaaS
+- Permissões granulares por módulo e ação (visualizar, editar, aprovar, excluir)
+- Trilha de auditoria completa (log de todas as ações com usuário, data/hora, IP, ação realizada)
+
+## 15. Módulo de Onboarding / Migração de Dados
+
+- Ferramenta de importação de dados da base legada (CSV, XML, Excel, banco de dados)
+- Validação e limpeza de dados na importação
+- Mapeamento de campos (de/para)
+- Relatório de inconsistências encontradas na migração
+- **OCR + IA para extração de dados** de documentos antigos, PDFs e planilhas desestruturadas
+- Classificação automática de documentos (carnê, certidão, alvará)
+
+## 16. Educação Fiscal
+
+- Materiais informativos sobre a importância do ISS e IPTU
+- Guias práticos sobre como utilizar o sistema
+- FAQ dinâmico
+
+## 17. Design e UX
+
+- Interface moderna, intuitiva e amigável
+- Design responsivo (mobile-first)
+- PWA (Progressive Web App) — instalável no celular sem app store
+- Acessibilidade (leitores de tela, contraste, WCAG)
+
+## 18. Segurança e Compliance
+
+- Criptografia de dados em trânsito (TLS) e em repouso
+- Conformidade com LGPD (consentimento, anonimização, portabilidade)
+- Backup automatizado
+- Assinatura digital em documentos oficiais (CND, CDA, notificações)
+
+---
+
+# ═══════════════════════════════════════════
+# FASE V2 — Inteligência e Expansão
+# ═══════════════════════════════════════════
+
+## 19. Avaliação Inteligente de Valor de Mercado (IA)
+
+- Modelo preditivo de valor venal treinado com dados de transações reais (ITBI, escrituras, anúncios imobiliários)
+- Cruzamento com características do imóvel (área, padrão, idade, localização, zoneamento)
+- Score de confiança para cada avaliação
+- Sugestão automática de valor de mercado por imóvel
+- Alimenta diretamente o módulo de reajuste "a mercado"
+- **Técnica**: regressão (XGBoost, Random Forest) com dados tabulares
+
+## 20. Scoring de Inadimplência e Cobrança Inteligente
+
+- Classificação de contribuintes por probabilidade de pagamento (similar a credit scoring)
+- Otimização do canal e momento de cobrança (SMS, e-mail, carta — IA decide qual e quando)
+- Priorização de execução fiscal (maior valor + maior chance de recuperação)
+- Aumento da taxa de recuperação de crédito com menos esforço
+
+## 21. Previsão de Arrecadação (Forecasting)
+
+- Modelo de séries temporais para prever arrecadação mensal/anual
+- Segmentação por imposto, bairro, faixa de valor
+- Considera sazonalidade, inadimplência histórica, impacto de campanhas
+- Painel para o secretário de finanças planejar orçamento com dados reais
+
+## 22. Painel de Impacto Fiscal (Reajuste a Mercado)
+
+- Simulação macro: "se aplicarmos X% de reajuste, a arrecadação sobe Y reais"
+- Quantidade de contribuintes impactados por faixa
+- Distribuição geográfica do impacto (mapa de calor)
+- Ferramenta de apoio à decisão para prefeito/secretário
+
+## 23. Georreferenciamento / Mapa Interativo
+
+- Integração com mapa (OpenStreetMap / Google Maps / Leaflet)
+- Visualização de imóveis, quadras, zonas fiscais no mapa
+- Filtros por situação (adimplente, inadimplente, isento, dívida ativa)
+- Mapa de calor de arrecadação e inadimplência por região
+- Localização de imóveis por inscrição imobiliária
+
+## 24. ITBI (Imposto de Transmissão de Bens Imóveis)
+
+- Cálculo automático do ITBI com base no valor da transação ou valor venal (o maior)
+- Emissão de guia de recolhimento
+- Vinculação com o cadastro imobiliário (transferência de propriedade)
+- Cruzamento de valores declarados vs. valor de mercado (alimenta modelo de IA)
+
+## 25. Taxas Municipais
+
+- Coleta de lixo
+- Iluminação pública (COSIP/CIP)
+- Alvará de funcionamento
+- Taxa de fiscalização
+- Configuração flexível de novas taxas por tenant
+
+## 26. Login com Gov.br
+
+- Integração com o login único do governo federal (OAuth2 / OpenID Connect)
+- Nível de confiança (bronze, prata, ouro) conforme exigência do município
+
+## 27. Workflow de Processos Administrativos
+
+- Protocolo de impugnação de valor venal
+- Solicitação de revisão cadastral
+- Pedido de isenção/imunidade com fluxo de aprovação
+- Acompanhamento de status pelo contribuinte
+- Notificações automáticas em cada etapa
+
+## 28. Gestão de Fiscalização
+
+- Planejamento de vistorias e ordens de serviço
+- Agenda de fiscalização
+- Registro fotográfico e geolocalizado
+- Identificação de irregularidades e geração de auto de infração
+- Monitoramento de produtividade dos fiscais
+
+## 29. Integração com Sistemas Externos
+
+- Conexão com sistemas estaduais e federais para troca de informações fiscais
+- Integração com plataformas de serviços municipais
+- APIs abertas para integração com sistemas de contabilidade e ERP municipais
+- Integração com cartórios (protesto de CDA)
+
+## 30. Multi-idioma e Acessibilidade Avançada
+
+- Suporte a múltiplos idiomas (português, inglês, espanhol)
+- Conformidade WCAG 2.1 nível AA
+
+---
+
+# ═══════════════════════════════════════════
+# FASE V3 — IA Avançada e Analytics
+# ═══════════════════════════════════════════
+
+## 31. Detecção de Fraude e Sonegação (IA)
+
+- Identificação de inconsistências cadastrais:
+  - Imóvel declarado como "terreno baldio" com consumo de energia alto
+  - Área construída incompatível com IPTU pago
+  - CNPJ ativo sem ISS recolhido
+  - Faturamento alto com ISS baixo
+- Anomaly detection para padrões suspeitos de subdeclaração
+- Alertas automáticos para a equipe de fiscalização
+- Dashboard de casos suspeitos com priorização por valor potencial
+
+## 32. Visão Computacional + Imagens de Satélite (IA)
+
+- Análise de imagens de satélite para detectar:
+  - Construções não declaradas
+  - Ampliações irregulares
+  - Mudança de uso do solo
+- Comparação automática: imagem atual vs. cadastro
+- Geração de alertas para fiscalização
+- **Técnica**: segmentação de imagens (U-Net, YOLO)
+
+## 33. Análise de Legislação com NLP (IA)
+
+- Parser inteligente de leis municipais, decretos e portarias
+- Extração automática de alíquotas, faixas, isenções, prazos
+- Quando a legislação muda, o sistema sugere alterações de parametrização
+- Reduz erro humano na configuração e acelera adequação legal
+
+## 34. Analytics Avançado
+
+- Business Intelligence integrado
+- Análise preditiva de tendências de arrecadação
+- Benchmarking entre municípios (dados anonimizados entre tenants)
+- Relatórios customizáveis com drag-and-drop
+- Exportação para ferramentas de BI externas (Power BI, Tableau)
+
+## 35. Cruzamento Massivo de Dados
+
+- Integração com bases externas (Receita Federal, CAGED, RAIS, cartórios, concessionárias)
+- Identificação automática de contribuintes não cadastrados
+- Ampliação da base tributária sem aumento de alíquota
+- Relatório de potencial de arrecadação não explorado
+
+---
+
+# ═══════════════════════════════════════════
+# CONSIDERAÇÕES TÉCNICAS GERAIS
+# ═══════════════════════════════════════════
+
+## Infraestrutura
+
+- Cloud-native (AWS, Azure ou GCP)
+- Escalabilidade horizontal (containers / Kubernetes)
+- CI/CD automatizado
+- Monitoramento e observabilidade (logs, métricas, alertas)
+
+## Banco de Dados
+
+- Banco relacional para dados transacionais (PostgreSQL)
+- Banco de dados para analytics/BI (data warehouse)
+- Cache para performance (Redis)
+
+## Segurança
+
+- Criptografia em trânsito (TLS 1.3) e em repouso (AES-256)
+- WAF (Web Application Firewall)
+- Testes de penetração periódicos
+- Gestão de segredos (Vault)
+- Conformidade LGPD
+
+## UX/UI
+
+- Design system próprio
+- Mobile-first e responsivo
+- PWA (Progressive Web App)
+- Acessibilidade WCAG 2.1
+- Testes de usabilidade com usuários reais
+
+## Integrações
+
+- Gateway de pagamento (PIX, boleto, cartão)
+- SMS e e-mail transacional
+- Gov.br (login)
+- APIs de geolocalização
+- APIs de dados públicos (Receita Federal, IBGE)
+
+---
+
+# ═══════════════════════════════════════════
+# RESUMO POR FASE
+# ═══════════════════════════════════════════
+
+## MVP (Operação do primeiro cliente)
+
+| # | Módulo |
+|---|--------|
+| 1 | Arquitetura Multi-Tenant |
+| 2 | Cadastro de Contribuintes (PF/PJ) |
+| 3 | Cadastro Imobiliário (BCI) |
+| 4 | Planta Genérica de Valores (PGV) |
+| 5 | Cálculo Automático (IPTU + ISS) |
+| 6 | Reajuste IPTU "a Mercado" |
+| 7 | Emissão de Guias (PIX, boleto, cartão) |
+| 8 | Dívida Ativa + CDA |
+| 9 | Parcelamento de Débitos |
+| 10 | Certidão Negativa (CND) |
+| 11 | Consulta de Débitos |
+| 12 | Portal do Contribuinte |
+| 13 | Chatbot com IA |
+| 14 | Alertas e Notificações |
+| 15 | Relatórios e Dashboards |
+| 16 | Controle de Acesso e Perfis |
+| 17 | Onboarding / Migração (com OCR + IA) |
+| 18 | Educação Fiscal |
+| 19 | Design Responsivo / PWA |
+| 20 | Segurança e LGPD |
+
+## V2 (Inteligência e Expansão)
+
+| # | Módulo |
+|---|--------|
+| 21 | Avaliação Inteligente de Valor de Mercado (IA) |
+| 22 | Scoring de Inadimplência / Cobrança Inteligente |
+| 23 | Previsão de Arrecadação (Forecasting) |
+| 24 | Painel de Impacto Fiscal |
+| 25 | Georreferenciamento / Mapa Interativo |
+| 26 | ITBI |
+| 27 | Taxas Municipais |
+| 28 | Login Gov.br |
+| 29 | Workflow de Processos Administrativos |
+| 30 | Gestão de Fiscalização |
+| 31 | Integração com Sistemas Externos |
+| 32 | Multi-idioma e Acessibilidade Avançada |
+
+## V3 (IA Avançada e Analytics)
+
+| # | Módulo |
+|---|--------|
+| 33 | Detecção de Fraude e Sonegação (IA) |
+| 34 | Visão Computacional + Satélite (IA) |
+| 35 | Análise de Legislação com NLP (IA) |
+| 36 | Analytics Avançado / BI |
+| 37 | Cruzamento Massivo de Dados |
