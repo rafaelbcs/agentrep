@@ -1,8 +1,8 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, CheckCircle, ArrowLeft } from 'lucide-react'
+import { ExternalLink, CheckCircle, ArrowLeft, Shield } from 'lucide-react'
 import { api } from '@/lib/api'
-import { TIER_CONFIG, truncateAddress, formatSuccessRate, CATEGORIES } from '@/lib/utils'
+import { TIER_CONFIG, truncateAddress, formatSuccessRate, CATEGORIES, cn } from '@/lib/utils'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 
 export function AgentProfilePage() {
@@ -16,8 +16,15 @@ export function AgentProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center text-gray-400">
-        Loading reputation data...
+      <div className="max-w-4xl mx-auto px-4 py-20">
+        <div className="space-y-4 animate-pulse">
+          <div className="h-32 bg-ar-surface border border-white/[0.07] rounded-2xl" />
+          <div className="grid grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-20 bg-ar-surface border border-white/[0.07] rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
@@ -25,8 +32,14 @@ export function AgentProfilePage() {
   if (isError || !rep) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-        <p className="text-gray-500 mb-4">Agent not found or not yet registered.</p>
-        <Link to="/explore" className="text-blue-600 hover:underline">← Back to Explorer</Link>
+        <div className="w-16 h-16 bg-ar-surface border border-white/[0.07] rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Shield className="w-8 h-8 text-slate-600" />
+        </div>
+        <p className="text-slate-400 mb-2 font-medium">Agent not found</p>
+        <p className="text-slate-600 text-sm mb-6">This address is not yet registered on AgentRep</p>
+        <Link to="/explore" className="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+          ← Back to Explorer
+        </Link>
       </div>
     )
   }
@@ -40,54 +53,70 @@ export function AgentProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <Link to="/explore" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-8">
+      <Link
+        to="/explore"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 mb-8 transition-colors"
+      >
         <ArrowLeft className="w-4 h-4" /> Back to Explorer
       </Link>
 
-      {/* Header */}
-      <div className="bg-white border rounded-2xl p-8 mb-6">
+      {/* Header card */}
+      <div className={cn(
+        'bg-ar-surface border border-white/[0.07] rounded-2xl p-8 mb-5 transition-all',
+        tier.glow && tier.glow,
+      )}>
         <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white font-bold text-3xl shrink-0">
-            {rep.agentAddress.slice(2, 4).toUpperCase()}
+          {/* Avatar */}
+          <div className="w-18 h-18 shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-indigo-600/30 border border-white/[0.1] flex items-center justify-center text-white font-bold text-2xl">
+              {rep.agentAddress.slice(2, 4).toUpperCase()}
+            </div>
           </div>
+
+          {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap mb-1">
-              <h1 className="text-2xl font-bold text-gray-900">
+            <div className="flex items-center gap-3 flex-wrap mb-1.5">
+              <h1 className="text-xl font-bold text-white">
                 {truncateAddress(rep.agentAddress, 6)}
               </h1>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${tier.bg} ${tier.color}`}>
+              <span className={cn(
+                'text-xs font-semibold px-2.5 py-1 rounded-full border',
+                tier.bg, tier.color, tier.border
+              )}>
                 {tier.label}
               </span>
               {rep.onChainVerified && (
-                <span className="inline-flex items-center gap-1 text-xs text-green-600">
-                  <CheckCircle className="w-3 h-3" /> On-chain verified
+                <span className="inline-flex items-center gap-1 text-xs text-emerald-400/80">
+                  <CheckCircle className="w-3 h-3" /> Verified on-chain
                 </span>
               )}
             </div>
-            <p className="text-gray-400 font-mono text-sm">{rep.agentAddress}</p>
+            <p className="text-slate-500 font-mono text-sm">{rep.agentAddress}</p>
           </div>
+
+          {/* BaseScan link */}
           <a
             href={rep.chainTxUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-gray-500 border rounded-lg px-4 py-2 hover:bg-gray-50 shrink-0"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 border border-white/[0.07] hover:border-white/[0.14] rounded-xl px-4 py-2.5 transition-all shrink-0"
           >
-            <ExternalLink className="w-4 h-4" /> BaseScan
+            <ExternalLink className="w-3.5 h-3.5" /> BaseScan
           </a>
         </div>
 
         {/* Score bar */}
         <div className="mt-8">
-          <div className="flex items-end gap-2 mb-2">
-            <span className="text-5xl font-bold text-gray-900">{rep.score}</span>
-            <span className="text-gray-400 mb-1">/100</span>
-            <span className="ml-auto text-sm text-gray-500">
+          <div className="flex items-end gap-2 mb-3">
+            <span className="text-6xl font-bold text-white tabular-nums leading-none">{rep.score}</span>
+            <span className="text-slate-600 mb-1.5 text-sm">/100</span>
+            <span className="ml-auto text-sm text-slate-500">
               {formatSuccessRate(rep.successRate)} success · {rep.totalOutcomes} outcomes
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-3">
+          <div className="w-full bg-white/[0.06] rounded-full h-2">
             <div
-              className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all"
+              className="h-2 rounded-full score-bar transition-all duration-700"
               style={{ width: `${Math.min(rep.score, 100)}%` }}
             />
           </div>
@@ -95,37 +124,41 @@ export function AgentProfilePage() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         {[
           { label: 'Score', value: rep.score },
           { label: 'Total Outcomes', value: rep.totalOutcomes.toLocaleString() },
           { label: 'Success Rate', value: formatSuccessRate(rep.successRate) },
-          { label: 'Tier', value: tier.label },
+          { label: 'Tier', value: <span className={tier.color}>{tier.label}</span> },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white border rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">{label}</p>
-            <p className="text-xl font-bold text-gray-900">{value}</p>
+          <div key={label} className="bg-ar-surface border border-white/[0.07] rounded-xl p-4 text-center">
+            <p className="text-xs text-slate-600 mb-1.5 uppercase tracking-wider">{label}</p>
+            <p className="text-xl font-bold text-white">{value}</p>
           </div>
         ))}
       </div>
 
-      {/* Category scores */}
+      {/* Category scores + radar */}
       {Object.keys(rep.categories || {}).length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white border rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Category Scores</h2>
-            <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Category bars */}
+          <div className="bg-ar-surface border border-white/[0.07] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-slate-300 mb-5 uppercase tracking-wider">Category Scores</h2>
+            <div className="space-y-4">
               {Object.entries(rep.categories).map(([cat, data]) => {
                 const catLabel = CATEGORIES.find((c) => c.value === cat)?.label ?? cat
                 return (
                   <div key={cat}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-700">{catLabel}</span>
-                      <span className="font-semibold">{data.score}/100 <span className="text-gray-400 font-normal">({data.count})</span></span>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-400 text-xs">{catLabel}</span>
+                      <span className="text-xs font-semibold text-slate-300 tabular-nums">
+                        {data.score}<span className="text-slate-600 font-normal">/100</span>
+                        <span className="text-slate-600 font-normal ml-1.5">({data.count})</span>
+                      </span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className="w-full bg-white/[0.05] rounded-full h-1">
                       <div
-                        className="h-1.5 rounded-full bg-blue-500"
+                        className="h-1 rounded-full score-bar"
                         style={{ width: `${data.score}%` }}
                       />
                     </div>
@@ -135,13 +168,24 @@ export function AgentProfilePage() {
             </div>
           </div>
 
-          <div className="bg-white border rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Radar</h2>
+          {/* Radar */}
+          <div className="bg-ar-surface border border-white/[0.07] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-slate-300 mb-5 uppercase tracking-wider">Radar</h2>
             <ResponsiveContainer width="100%" height={220}>
               <RadarChart data={radarData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="category" tick={{ fontSize: 11 }} />
-                <Radar name="Score" dataKey="score" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
+                <PolarGrid stroke="rgba(255,255,255,0.07)" />
+                <PolarAngleAxis
+                  dataKey="category"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                />
+                <Radar
+                  name="Score"
+                  dataKey="score"
+                  stroke="#3b82f6"
+                  fill="#3b82f6"
+                  fillOpacity={0.15}
+                  strokeWidth={1.5}
+                />
               </RadarChart>
             </ResponsiveContainer>
           </div>

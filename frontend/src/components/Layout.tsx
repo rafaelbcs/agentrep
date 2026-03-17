@@ -11,12 +11,17 @@ export function Layout() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-50">
+    <div className="min-h-screen bg-ar-bg flex flex-col">
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-ar-bg/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-            <Shield className="w-6 h-6 text-blue-600" />
-            <span>AgentRep</span>
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/25 flex items-center justify-center transition-all group-hover:bg-blue-500/25">
+              <Shield className="w-4 h-4 text-blue-400" />
+            </div>
+            <span className="font-bold text-lg tracking-tight text-white">
+              Agent<span className="text-blue-400">Rep</span>
+            </span>
           </Link>
 
           <nav className="flex items-center gap-1">
@@ -25,10 +30,10 @@ export function Layout() {
                 key={link.to}
                 to={link.to}
                 className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
                   pathname === link.to
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
                 )}
               >
                 {link.label}
@@ -38,13 +43,26 @@ export function Layout() {
         </div>
       </header>
 
-      <main>
+      {/* Content */}
+      <main className="flex-1">
         <Outlet />
       </main>
 
-      <footer className="border-t mt-24 py-10 text-center text-sm text-gray-400">
-        <p>AgentRep — Trust as a Service for AI Agent Economies</p>
-        <p className="mt-1">On-chain reputation · x402 payments · Base L2</p>
+      {/* Footer */}
+      <footer className="border-t border-white/[0.06] mt-24 py-10">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-blue-400/60" />
+            <span className="text-sm font-medium text-slate-500">AgentRep</span>
+          </div>
+          <p className="text-xs text-slate-600 text-center">
+            Trust as a Service for AI Agent Economies · On-chain reputation · Base L2
+          </p>
+          <div className="flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-slow" />
+            <span className="text-xs text-slate-600">Base Mainnet</span>
+          </div>
+        </div>
       </footer>
     </div>
   )

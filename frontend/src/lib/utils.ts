@@ -31,8 +31,8 @@ export const CATEGORIES = [
 ]
 
 export const TIER_CONFIG = {
-  UNKNOWN: { color: 'text-gray-400', bg: 'bg-gray-100', label: 'Unknown', border: 'border-gray-200' },
-  EMERGING: { color: 'text-blue-600', bg: 'bg-blue-50', label: 'Emerging', border: 'border-blue-200' },
-  TRUSTED: { color: 'text-green-600', bg: 'bg-green-50', label: 'Trusted', border: 'border-green-200' },
-  ELITE: { color: 'text-purple-600', bg: 'bg-purple-50', label: 'Elite', border: 'border-purple-200' },
+  UNKNOWN:  { color: 'text-slate-400',   bg: 'bg-slate-800/50',    label: 'Unknown',  border: 'border-slate-700/50', glow: '' },
+  EMERGING: { color: 'text-blue-400',    bg: 'bg-blue-500/10',     label: 'Emerging', border: 'border-blue-500/25',  glow: 'glow-blue' },
+  TRUSTED:  { color: 'text-emerald-400', bg: 'bg-emerald-500/10',  label: 'Trusted',  border: 'border-emerald-500/25', glow: 'glow-emerald' },
+  ELITE:    { color: 'text-amber-400',   bg: 'bg-amber-500/10',    label: 'Elite',    border: 'border-amber-500/25', glow: 'glow-amber' },
 } as const
