@@ -1,0 +1,14 @@
+SISTEMA DE GESTÃO PREVIDENCIÁRIA - SIGEP
+
+O SIGEP é um moderno sistema de processamento de dados desenvolvido para a gestão dos Planos de Previdência dos Regimes Próprios. Tem como objetivo atender as necessidades dos Regimes Próprios oferecendo qualidade, segurança e eficiência. 
+
+https://sigep.serconprev.com.br:8888
+
+Estamos atualmente migrando este sistema em delphi para spring boot com react. Estamos na 4 sprint de 6 sprints
+
+Recebo 4.000 por cada sprint. O cliente esta atrasando por problemas financeiros, mas deve honrar o contrato.
+
+Temos proposta de ser socios do sistema, de receber uma parte do faturamento. Eles possuem 80 entes como cliente,
+alguns pagando 3000 no mes ( nao se se todos sao assim).
+
+Tambem mantemos o sistema do esocial deles. vamos mante-lo por mes e eu devo ganhar 1.000 por mes.

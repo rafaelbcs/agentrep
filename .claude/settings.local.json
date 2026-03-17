@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile -q)",
+      "Bash(npx hardhat:*)",
+      "Bash(mvn test:*)",
+      "Bash(curl -s http://localhost:8082/api/v1/outcome/2ce0449e-cbc3-4530-a399-abcd13c356e9 -H \"X-API-Key: arep_live_jAi9qHQcuS3PB_okwLT-6NX1ZLPKhCA8m6kghfKZ4n0\")"
+    ]
+  }
+}
