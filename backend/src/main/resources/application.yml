@@ -3,7 +3,7 @@ spring:
     name: agentrep-backend
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/agentrep}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/agentrep}
     username: ${DB_USERNAME:agentrep}
     password: ${DB_PASSWORD:agentrep}
     driver-class-name: org.postgresql.Driver
@@ -56,20 +56,47 @@ agentrep:
     dispute-stake-usdc: "0.50"
     dispute-fee-usdc: "0.10"
     usdc-contract-address: ${USDC_ADDRESS:0x036CbD53842c5426634e7929541eC2318f3dCF7e}  # Base Sepolia USDC
+  rate-limit:
+    outcome-per-minute: ${RATE_LIMIT_OUTCOME:10}
+    dispute-per-minute: ${RATE_LIMIT_DISPUTE:5}
+    register-per-minute: ${RATE_LIMIT_REGISTER:3}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   jwt:
     secret: ${JWT_SECRET:dev-secret-change-in-production-at-least-32-chars}
     expiration-ms: 86400000  # 24h
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      onchain:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        sliding-window-size: 10
+        wait-duration-in-open-state: 30s
+  retry:
+    instances:
+      llmJudge:
+        max-attempts: 2
+        wait-duration: 1s
+  timelimiter:
+    instances:
+      llmJudge:
+        timeout-duration: 30s
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
   endpoint:
     health:
       show-details: when-authorized
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: agentrep
 
 springdoc:
   api-docs:

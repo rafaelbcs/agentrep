@@ -34,7 +34,7 @@ public class AgentService {
 
     @Transactional
     public AgentRegisterResponse register(AgentRegisterRequest request) {
-        if (agentRepository.existsByWalletAddress(request.getAgentAddress())) {
+        if (agentRepository.existsByWalletAddress(request.getAgentAddress().toLowerCase())) {
             throw new IllegalArgumentException("Agent with this wallet address already registered");
         }
 

@@ -27,6 +27,8 @@ public class OutcomeService {
     private final LlmJudgeService llmJudgeService;
     private final OnChainService onChainService;
     private final WebhookService webhookService;
+    private final EvmSignatureService evmSignatureService;
+    private final MetricsService metricsService;
 
     private static final List<String> VALID_CATEGORIES = AgentService.VALID_CATEGORIES;
 
@@ -35,6 +37,14 @@ public class OutcomeService {
         if (!VALID_CATEGORIES.contains(request.getTaskCategory())) {
             throw new IllegalArgumentException("Invalid category: " + request.getTaskCategory()
                 + ". Valid: " + VALID_CATEGORIES);
+        }
+
+        // Valida assinatura EVM se presente (fail-open: ausente gera warning, não bloqueia)
+        if (request.getRequesterSignature() != null && !request.getRequesterSignature().isBlank()) {
+            String signedMessage = "AgentRep:outcome:" + request.getContractorAgentAddress().toLowerCase()
+                + ":" + request.getDeliverableHash();
+            evmSignatureService.verify(signedMessage, request.getRequesterSignature(),
+                request.getRequesterAgentAddress());
         }
 
         Agent contractor = agentRepository.findByWalletAddress(request.getContractorAgentAddress().toLowerCase())
@@ -88,6 +98,8 @@ public class OutcomeService {
             outcome.setStatus(OutcomeStatus.RESOLVED);
             outcomeRepository.save(outcome);
 
+            metricsService.recordOutcome(result.verdict() == OutcomeVerdict.SUCCESS);
+
             AgentScoreUpdate scoreUpdate = updateAgentScore(outcome.getContractorAgent().getId());
             log.info("Outcome {} resolved by LLM Judge: {} (confidence={})",
                 outcomeId, result.verdict(), result.confidence());
@@ -106,13 +118,15 @@ public class OutcomeService {
             ));
 
             // Sync to blockchain (non-blocking — failure does not affect outcome)
-            onChainService.registerOutcome(outcome, scoreUpdate.score(), scoreUpdate.totalOutcomes(), scoreUpdate.successCount())
-                .ifPresent(txHash -> {
-                    outcome.setOnChainTxHash(txHash);
-                    outcome.setOnChainRegisteredAt(java.time.Instant.now());
-                    outcomeRepository.save(outcome);
-                    log.info("Outcome {} recorded onchain: {}", outcomeId, txHash);
-                });
+            var txHash = onChainService.registerOutcome(
+                outcome, scoreUpdate.score(), scoreUpdate.totalOutcomes(), scoreUpdate.successCount());
+            metricsService.recordOnchainSync(txHash.isPresent());
+            txHash.ifPresent(hash -> {
+                outcome.setOnChainTxHash(hash);
+                outcome.setOnChainRegisteredAt(java.time.Instant.now());
+                outcomeRepository.save(outcome);
+                log.info("Outcome {} recorded onchain: {}", outcomeId, hash);
+            });
         } catch (Exception e) {
             log.error("Failed to evaluate outcome {}", outcomeId, e);
         }

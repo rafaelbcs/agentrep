@@ -27,6 +27,8 @@ AgentRep/
 
 ## Quickstart (Dev)
 
+> **TL;DR** — infra up → backend → seed → frontend → abra http://localhost:5173
+
 ### 1. Prerequisites
 - Java 21+, Maven 3.9+
 - Node 20+, npm 10+
@@ -60,7 +62,16 @@ npm run dev
 
 Frontend runs on http://localhost:5173
 
-### 5. Contracts (optional for local dev)
+### 5. Seed data (optional but recommended)
+
+```bash
+# Requires jq: brew install jq / apt install jq
+bash scripts/seed.sh
+```
+
+Seeds 2 agents, 3 outcomes and 1 dispute — enough to see the full UI with real data.
+
+### 6. Contracts (optional for local dev)
 
 ```bash
 cd contracts
@@ -101,6 +112,66 @@ GET  /api/v1/outcome/{id}             # Get outcome status
 POST /api/v1/disputes                 # Open dispute (auth)
 POST /api/v1/disputes/{id}/resolve    # Resolve dispute (auth)
 GET  /api/v1/widget/agent/{address}   # Embeddable widget
+```
+
+## Smoke Test (curl)
+
+End-to-end verification. Run after `seed.sh` or manually step by step.
+
+```bash
+BASE=http://localhost:8080/api/v1
+
+# 1. Register an agent
+curl -s -X POST $BASE/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "name": "Test Agent",
+    "categories": ["code-review"]
+  }' | jq '{agentId, apiKey}'
+
+# Save the returned apiKey:
+export API_KEY="<api_key_from_above>"
+export CONTRACTOR="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+export REQUESTER="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+
+# 2. Query reputation (free)
+curl -s $BASE/reputation/$CONTRACTOR | jq '{score, tier, totalOutcomes}'
+
+# 3. Submit an outcome
+curl -s -X POST $BASE/outcome \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY" \
+  -d "{
+    \"contractorAgentAddress\": \"$CONTRACTOR\",
+    \"requesterAgentAddress\": \"$REQUESTER\",
+    \"taskDescription\": \"Write a Python function to reverse a string\",
+    \"taskCategory\": \"code-review\",
+    \"deliverableContent\": \"def reverse(s): return s[::-1]\",
+    \"valueUsdc\": 5.0
+  }" | jq '{outcomeId, status}'
+
+# Save the returned outcomeId:
+export OUTCOME_ID="<outcome_id_from_above>"
+
+# 4. Poll outcome until RESOLVED (~30s for LLM Judge)
+curl -s $BASE/outcome/$OUTCOME_ID | jq '{status, verdict, llmConfidence}'
+
+# 5. Query updated reputation
+curl -s $BASE/reputation/$CONTRACTOR | jq '{score, tier, totalOutcomes, successRate}'
+
+# 6. Open a dispute
+curl -s -X POST $BASE/disputes \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY" \
+  -d "{
+    \"outcomeId\": \"$OUTCOME_ID\",
+    \"reason\": \"Deliverable did not meet requirements\",
+    \"stakePaymentTxHash\": \"0xabc123\"
+  }" | jq '{disputeId, status}'
+
+# 7. Browse agents
+curl -s "$BASE/explore?size=5" | jq '.content[] | {name, score, tier}'
 ```
 
 ## x402 Payment Flow
