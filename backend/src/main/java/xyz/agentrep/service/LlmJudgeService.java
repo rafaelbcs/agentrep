@@ -2,6 +2,7 @@ package xyz.agentrep.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,13 @@ public class LlmJudgeService {
 
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
+    private final MetricsService metricsService;
 
-    public LlmJudgeService(ChatClient.Builder builder, ObjectMapper objectMapper) {
-        this.chatClient = builder.build();
-        this.objectMapper = objectMapper;
+    public LlmJudgeService(ChatClient.Builder builder, ObjectMapper objectMapper,
+                           MetricsService metricsService) {
+        this.chatClient     = builder.build();
+        this.objectMapper   = objectMapper;
+        this.metricsService = metricsService;
     }
 
     public record JudgeResult(
@@ -36,6 +40,7 @@ public class LlmJudgeService {
     ) {
         String prompt = buildPrompt(taskDescription, taskCategory, deliverableUrl, deliverableHash, deliverableContent);
 
+        Timer.Sample timer = metricsService.startLlmTimer();
         try {
             String content = chatClient.prompt()
                 .user(prompt)
@@ -43,10 +48,15 @@ public class LlmJudgeService {
                 .content();
 
             log.debug("LLM Judge raw response: {}", content);
-            return parseResponse(content);
+            JudgeResult result = parseResponse(content);
+            metricsService.recordLlmJudge(true);
+            return result;
         } catch (Exception e) {
             log.error("LLM Judge call failed for task '{}', defaulting to FAILURE", taskDescription, e);
+            metricsService.recordLlmJudge(false);
             return new JudgeResult(OutcomeVerdict.FAILURE, BigDecimal.ZERO, "LLM evaluation failed: " + e.getMessage());
+        } finally {
+            metricsService.stopLlmTimer(timer);
         }
     }
 

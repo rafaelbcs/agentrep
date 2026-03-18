@@ -1,5 +1,6 @@
 package xyz.agentrep.service;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.*;
@@ -35,16 +36,19 @@ public class OnChainService {
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(300_000L);
     private static final BigInteger GAS_PRICE = BigInteger.valueOf(1_000_000_000L); // 1 gwei
 
-    private final Web3j      web3j;
-    private final Credentials credentials;
-    private final String     contractAddress;
-    private final long       chainId;
-    private final boolean    enabled;
+    private final Web3j          web3j;
+    private final Credentials    credentials;
+    private final String         contractAddress;
+    private final long           chainId;
+    private final boolean        enabled;
+    private final CircuitBreaker circuitBreaker;
 
-    public OnChainService(Web3j web3j, String privateKey, String contractAddress, long chainId) {
-        this.web3j           = web3j;
+    public OnChainService(Web3j web3j, String privateKey, String contractAddress, long chainId,
+                          CircuitBreaker circuitBreaker) {
+        this.web3j          = web3j;
         this.contractAddress = contractAddress;
         this.chainId         = chainId;
+        this.circuitBreaker  = circuitBreaker;
 
         boolean hasKey      = privateKey != null && !privateKey.isBlank();
         boolean hasContract = contractAddress != null
@@ -175,41 +179,50 @@ public class OnChainService {
     // ─── Internal ─────────────────────────────────────────────────────────────
 
     private Optional<String> send(Function function) {
-        try {
-            String encoded = FunctionEncoder.encode(function);
-
-            BigInteger nonce = web3j
-                .ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST)
-                .send()
-                .getTransactionCount();
-
-            RawTransaction tx = RawTransaction.createTransaction(
-                nonce,
-                GAS_PRICE,
-                GAS_LIMIT,
-                contractAddress,
-                BigInteger.ZERO,
-                encoded
-            );
-
-            byte[] signed  = TransactionEncoder.signMessage(tx, chainId, credentials);
-            String hexValue = Numeric.toHexString(signed);
-
-            EthSendTransaction response = web3j.ethSendRawTransaction(hexValue).send();
-
-            if (response.hasError()) {
-                log.error("onchain tx error: {}", response.getError().getMessage());
-                return Optional.empty();
-            }
-
-            String txHash = response.getTransactionHash();
-            log.info("onchain tx sent: {} (fn={})", txHash, function.getName());
-            return Optional.of(txHash);
-
-        } catch (Exception e) {
-            log.error("onchain send failed (fn={}): {}", function.getName(), e.getMessage());
+        if (circuitBreaker != null && circuitBreaker.getState() == CircuitBreaker.State.OPEN) {
+            log.warn("Circuit breaker OPEN — skipping onchain call: {}", function.getName());
             return Optional.empty();
         }
+        try {
+            return circuitBreaker != null
+                ? circuitBreaker.executeCheckedSupplier(() -> doSend(function))
+                : doSend(function);
+        } catch (Throwable e) {
+            log.error("onchain send failed via circuit breaker (fn={}): {}", function.getName(), e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // doSend deixa exceções propagarem para o circuit breaker registrá-las
+    private Optional<String> doSend(Function function) throws Exception {
+        String encoded = FunctionEncoder.encode(function);
+
+        BigInteger nonce = web3j
+            .ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST)
+            .send()
+            .getTransactionCount();
+
+        RawTransaction tx = RawTransaction.createTransaction(
+            nonce,
+            GAS_PRICE,
+            GAS_LIMIT,
+            contractAddress,
+            BigInteger.ZERO,
+            encoded
+        );
+
+        byte[] signed   = TransactionEncoder.signMessage(tx, chainId, credentials);
+        String hexValue = Numeric.toHexString(signed);
+
+        EthSendTransaction response = web3j.ethSendRawTransaction(hexValue).send();
+
+        if (response.hasError()) {
+            throw new RuntimeException("onchain tx error: " + response.getError().getMessage());
+        }
+
+        String txHash = response.getTransactionHash();
+        log.info("onchain tx sent: {} (fn={})", txHash, function.getName());
+        return Optional.of(txHash);
     }
 
     // ─── Utils ────────────────────────────────────────────────────────────────

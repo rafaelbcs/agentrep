@@ -41,19 +41,19 @@ class OnChainServiceTest {
 
     @Test
     void isDisabled_whenContractIsZeroAddress() {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, ZERO_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, ZERO_CONTRACT, CHAIN_ID, null);
         assertThat(service.isEnabled()).isFalse();
     }
 
     @Test
     void isDisabled_whenPrivateKeyIsBlank() {
-        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID, null);
         assertThat(service.isEnabled()).isFalse();
     }
 
     @Test
     void registerAgent_returnsEmpty_whenDisabled() {
-        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID, null);
         Optional<String> result = service.registerAgent("0xabc");
         assertThat(result).isEmpty();
         verifyNoInteractions(web3j);
@@ -61,7 +61,7 @@ class OnChainServiceTest {
 
     @Test
     void registerOutcome_returnsEmpty_whenDisabled() {
-        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, "", VALID_CONTRACT, CHAIN_ID, null);
         Optional<String> result = service.registerOutcome(buildOutcome(), BigDecimal.valueOf(85), 10, 8);
         assertThat(result).isEmpty();
         verifyNoInteractions(web3j);
@@ -71,7 +71,7 @@ class OnChainServiceTest {
 
     @Test
     void registerAgent_returnsTxHash_onSuccess() throws Exception {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         mockSuccessfulTransaction("0xdeadbeef01");
 
         Optional<String> result = service.registerAgent("0xabcdef1234567890abcdef1234567890abcdef12");
@@ -81,7 +81,7 @@ class OnChainServiceTest {
 
     @Test
     void registerOutcome_returnsTxHash_onSuccess() throws Exception {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         mockSuccessfulTransaction("0xdeadbeef02");
 
         Optional<String> result = service.registerOutcome(buildOutcome(), BigDecimal.valueOf(87.32), 10, 9);
@@ -91,7 +91,7 @@ class OnChainServiceTest {
 
     @Test
     void recordDispute_returnsTxHash_onSuccess() throws Exception {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         mockSuccessfulTransaction("0xdeadbeef03");
 
         Optional<String> result = service.recordDispute(
@@ -104,7 +104,7 @@ class OnChainServiceTest {
 
     @Test
     void registerAgent_returnsEmpty_onIoException() throws Exception {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         mockNonceThrows(new IOException("RPC unavailable"));
 
         Optional<String> result = service.registerAgent("0xabcdef1234567890abcdef1234567890abcdef12");
@@ -114,7 +114,7 @@ class OnChainServiceTest {
 
     @Test
     void registerAgent_returnsEmpty_whenTxHasError() throws Exception {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         mockTransactionWithError("execution reverted");
 
         Optional<String> result = service.registerAgent("0xabcdef1234567890abcdef1234567890abcdef12");
@@ -124,7 +124,7 @@ class OnChainServiceTest {
 
     @Test
     void neverThrows_onAnyFailure() {
-        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID);
+        var service = new OnChainService(web3j, VALID_PRIV_KEY, VALID_CONTRACT, CHAIN_ID, null);
         // web3j is mocked but not configured — will throw NullPointerException internally
         assertThatCode(() -> service.registerAgent("0xabc")).doesNotThrowAnyException();
         assertThatCode(() -> service.registerOutcome(buildOutcome(), BigDecimal.ZERO, 0, 0))

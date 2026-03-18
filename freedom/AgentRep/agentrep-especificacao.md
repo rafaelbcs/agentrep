@@ -29,7 +29,27 @@ A defesa não é UI. É **mecanismo econômico + consequência + verificabilidad
 > AgentRep faz **outcomes verificáveis + consequência econômica**. São camadas diferentes —
 > MolTrust responde “quem é esse agente?”, AgentRep responde “esse agente entrega o que promete?”.
 
-## 1.4 Posicionamento no ecossistema ERC-8004
+> **Diferencial vs ARC Network:** ARC Network ([docs](https://docs.arc.network)) implementa ERC-8004
+> para identidade onchain + ReputationRegistry alimentado por validadores externos chamando
+> `giveFeedback()` manualmente. AgentRep não compete — é **complementar e possivelmente integrado**:
+> AgentRep pode atuar como **validador qualificado dentro do ecossistema ARC**, alimentando o
+> ReputationRegistry deles com avaliações automatizadas via LLM Judge (em vez de feedback manual).
+> ARC responde “quem é esse agente e que credenciais tem?”, AgentRep responde
+> “esse agente cumpriu o que prometeu, com consequência econômica se errar?”.
+
+## 1.4 Mapa de concorrentes / parceiros
+
+| Projeto | O que faz | Relação com AgentRep |
+|---|---|---|
+| **ERC-8004** | Padrão de identidade onchain para agentes | Base — AgentRep escreve scores no ReputationRegistry |
+| **MolTrust** | Identidade + credenciais W3C DID | Complementar — "quem é o agente?" |
+| **ARC Network** | ERC-8004 infra + ReputationRegistry com feedback manual | Complementar — AgentRep pode ser **validador qualificado** no ecossistema ARC |
+
+> **Oportunidade ARC:** AgentRep pode se registrar como validador no ARC Network e alimentar
+> automaticamente o `ReputationRegistry` deles via LLM Judge — diferencial de go-to-market como
+> "o único avaliador com avaliação automatizada e stake" dentro do ecossistema ARC.
+
+## 1.5 Posicionamento no ecossistema ERC-8004
 
 **ERC-8004** (deployado em 29/01/2026) é um padrão Ethereum que fornece identidade onchain para agentes.
 AgentRep **não compete** com ele — **se posiciona como a camada de avaliação e disputa acima dele**.
@@ -376,4 +396,4 @@ O contrato define interfaces mínimas para comunicação com ERC-8004:
 Endereços configuráveis via `setERC8004Addresses()` (owner only).
 `address(0)` = sync desabilitado (padrão no testnet).
 
-*Documento criado em 07/03/2026 | Última revisão: 15/03/2026*
+*Documento criado em 07/03/2026 | Última revisão: 17/03/2026*

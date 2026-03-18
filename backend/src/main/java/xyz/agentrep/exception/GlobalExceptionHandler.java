@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import xyz.agentrep.service.IdempotencyService;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -23,6 +24,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return error(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(IdempotencyService.DuplicateRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicate(IdempotencyService.DuplicateRequestException ex) {
         return error(HttpStatus.CONFLICT, ex.getMessage());
     }
 

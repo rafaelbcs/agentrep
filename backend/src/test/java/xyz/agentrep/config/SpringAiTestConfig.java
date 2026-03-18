@@ -43,7 +43,19 @@ public class SpringAiTestConfig {
     }
 
     @Bean
-    public LlmJudgeService llmJudgeService(ChatClient.Builder builder, ObjectMapper objectMapper) {
-        return new LlmJudgeService(builder, objectMapper);
+    public io.micrometer.core.instrument.MeterRegistry meterRegistry() {
+        return new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+    }
+
+    @Bean
+    public xyz.agentrep.service.MetricsService metricsService(
+            io.micrometer.core.instrument.MeterRegistry registry) {
+        return new xyz.agentrep.service.MetricsService(registry);
+    }
+
+    @Bean
+    public LlmJudgeService llmJudgeService(ChatClient.Builder builder, ObjectMapper objectMapper,
+            xyz.agentrep.service.MetricsService metricsService) {
+        return new LlmJudgeService(builder, objectMapper, metricsService);
     }
 }
