@@ -1,7 +1,0 @@
-https://requisite.com.br/
-
-Neste projeto atuei como freelancer. Fizemos uma automação para venda de RPV, onde todo o processo de venda é feito por whatsapp.
-Usamos N8N e Base 64 para o sistema BackOffice. Ainda não temos proposta de fazer parte do negocio, estou terminando um freenlance onde vou receber 3000
-por fazer umas melhorias no sistema ( usar o monitoramento de termos do escavador para ver novos processo de rpv, para a equipe entrar em contato).
-Há um grande fundo de investimento interessada, em ter prioridade na compra dos rpvs ( a requisite ganha porcentagem no negocio). Talvez tenhamos um 
-contrato de manutenção.
