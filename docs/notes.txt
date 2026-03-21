@@ -1,0 +1,57 @@
+Passo a passo: Wallet + Base Sepolia
+PASSO 1 — Instalar MetaMask (sua wallet)
+Acesse metamask.io e clique em Download
+Instale a extensão no Chrome/Firefox
+Clique em Create a new wallet
+Crie uma senha
+IMPORTANTE: anote as 12 palavras secretas (seed phrase) em papel — quem tem essas palavras tem acesso à carteira
+Confirme as palavras na ordem pedida
+O que é uma wallet? É como uma conta bancária para criptomoedas, identificada por um endereço (ex: 0xAbCd...1234).
+
+PASSO 2 — Adicionar a rede Base Sepolia
+Base Sepolia é uma rede de testes — ETH aqui não tem valor real, serve só para desenvolver.
+
+No MetaMask, clique na rede atual (topo — provavelmente "Ethereum Mainnet")
+Clique em Add network → Add a network manually
+Preencha:
+Campo	Valor
+Network name	Base Sepolia
+RPC URL	https://sepolia.base.org
+Chain ID	84532
+Currency symbol	ETH
+Block explorer	https://sepolia.basescan.org
+Clique em Save e depois Switch to Base Sepolia
+PASSO 3 — Pegar ETH de testnet (faucet — gratuito)
+Copie seu endereço no MetaMask (clique no endereço 0x... — copia automaticamente)
+Acesse faucet.quicknode.com/base/sepolia
+Cole seu endereço e clique em Continue
+Pode pedir login com conta Google ou GitHub
+Aguarde 1–2 minutos — você receberá 0.05 ETH de testnet
+Faucet alternativo se o acima não funcionar: docs.base.org/docs/tools/network-faucets
+
+PASSO 4 — Pegar a chave privada
+A chave privada é o que o backend usa para assinar transações on-chain.
+
+No MetaMask, clique nos 3 pontinhos (⋮) → Account details
+Clique em Show private key
+Digite sua senha
+Copie a chave (começa com 0x...)
+⚠️ Nunca compartilhe essa chave com ninguém. Para fins de desenvolvimento, essa wallet só vai ter ETH de testnet sem valor real.
+
+PASSO 5 — Colocar no .env
+Abra o .env e preencha:
+
+
+DEPLOYER_PRIVATE_KEY=0x<sua-chave-privada>
+BACKEND_SIGNER_ADDRESS=0x<seu-endereço-público>
+O endereço público é o 0x... que aparece no topo do MetaMask (diferente da chave privada).
+
+Me avisa quando tiver feito os 5 passos que seguimos para o deploy do contrato.
+
+
+
+
+
+type	  name                  valor
+CNAME     api                   e7huaish.up.railway.app
+TXT       _railway-verify.api     railway-verify=64172a12a164a053a57cc08f36a78a5b475413f70bcd1bba393033ca0989cfab

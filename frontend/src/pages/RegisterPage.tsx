@@ -135,7 +135,14 @@ export function RegisterPage() {
         {mutation.isError && (
           <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{(mutation.error as Error)?.message ?? 'Registration failed. Please try again.'}</span>
+            <span>{(() => {
+              const err = mutation.error as any
+              const data = err?.response?.data
+              if (data?.fields) {
+                return Object.values(data.fields).join(' · ')
+              }
+              return data?.error ?? data?.message ?? 'Registration failed. Please try again.'
+            })()}</span>
           </div>
         )}
 
