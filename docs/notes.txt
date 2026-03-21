@@ -16,6 +16,7 @@ Clique em Add network → Add a network manually
 Preencha:
 Campo	Valor
 Network name	Base Sepolia
+
 RPC URL	https://sepolia.base.org
 Chain ID	84532
 Currency symbol	ETH
