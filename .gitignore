@@ -19,6 +19,7 @@ contracts/artifacts/
 contracts/cache/
 contracts/typechain-types/
 contracts/.openzeppelin/
+contracts/.env
 
 # ─── Environment / secrets ────────────────────────────────────────────────────
 .env

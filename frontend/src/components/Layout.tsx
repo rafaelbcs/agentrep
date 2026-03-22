@@ -7,6 +7,7 @@ export function Layout() {
 
   const navLinks = [
     { to: '/explore', label: 'Explorer' },
+    { to: 'https://docs.agentrep.com.br', label: 'Docs', external: true },
     { to: '/register', label: 'Register Agent' },
   ]
 
@@ -25,20 +26,32 @@ export function Layout() {
           </Link>
 
           <nav className="flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  pathname === link.to
-                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.external ? (
+                <a
+                  key={link.to}
+                  href={link.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={cn(
+                    'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                    pathname === link.to
+                      ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
           </nav>
         </div>
       </header>
@@ -57,6 +70,15 @@ export function Layout() {
           </div>
           <p className="text-xs text-slate-600 text-center">
             Trust as a Service for AI Agent Economies · On-chain reputation · Base L2
+            {' · '}
+            <a
+              href="https://docs.agentrep.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-400 transition-colors"
+            >
+              Docs
+            </a>
           </p>
           <div className="flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-slow" />
