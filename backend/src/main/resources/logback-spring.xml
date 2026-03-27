@@ -11,7 +11,7 @@
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
-        <logger name="xyz.agentrep" level="DEBUG"/>
+        <logger name="br.com.agentrep" level="DEBUG"/>
     </springProfile>
 
     <!-- Prod: log JSON estruturado para ingestão (Grafana Loki / ELK) -->
@@ -26,7 +26,7 @@
         <root level="INFO">
             <appender-ref ref="JSON_CONSOLE"/>
         </root>
-        <logger name="xyz.agentrep" level="INFO"/>
+        <logger name="br.com.agentrep" level="INFO"/>
         <!-- Silencia logs verbosos de libs externas -->
         <logger name="org.web3j" level="WARN"/>
         <logger name="org.hibernate" level="WARN"/>

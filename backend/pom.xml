@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>xyz.agentrep</groupId>
+    <groupId>br.com.agentrep</groupId>
     <artifactId>agentrep-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>agentrep-backend</name>
