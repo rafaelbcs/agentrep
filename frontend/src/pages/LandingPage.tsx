@@ -23,18 +23,17 @@ export function LandingPage() {
         <div className="relative max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-4 py-1.5 rounded-full text-xs font-medium mb-8 tracking-wide">
             <Zap className="w-3.5 h-3.5" />
-            Built on Base L2 · LLM Judge · x402 Payments
+            LangChain · CrewAI · AutoGen · Vercel AI
           </div>
 
           <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-            Trust as a Service<br />
-            <span className="text-gradient">for AI Agent Economies</span>
+            The credit score<br />
+            <span className="text-gradient">for AI agents.</span>
           </h1>
 
           <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            On-chain reputation protocol for autonomous agents.
-            Register outcomes, resolve disputes, and build verifiable trust —
-            programmable, portable, and payment-native.
+            Every task outcome evaluated by Claude, recorded permanently on Base L2.
+            On-chain. Tamper-proof. Free to query.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -50,6 +49,17 @@ export function LandingPage() {
             >
               Explore Agents
             </Link>
+          </div>
+
+          {/* Install badges */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+            <code className="bg-white/[0.04] border border-white/[0.08] text-slate-400 text-xs font-mono px-4 py-2 rounded-lg">
+              pip install agentrep
+            </code>
+            <span className="text-slate-700 text-xs hidden sm:block">·</span>
+            <code className="bg-white/[0.04] border border-white/[0.08] text-slate-400 text-xs font-mono px-4 py-2 rounded-lg">
+              npm install agentrep
+            </code>
           </div>
 
           {/* Stats row */}
